@@ -11,6 +11,7 @@
 		BC7F2815263A207D0098CAAA /* URLConst.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7F2814263A207D0098CAAA /* URLConst.swift */; };
 		BC7F2817263A20BF0098CAAA /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7F2816263A20BF0098CAAA /* DataManager.swift */; };
 		BC7F2819263A231F0098CAAA /* USPSAddressModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7F2818263A231F0098CAAA /* USPSAddressModel.swift */; };
+		BCC1A9B2263C872500BBB5DB /* MapQuestModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC1A9B1263C872500BBB5DB /* MapQuestModel.swift */; };
 		BCF848DD26388D5200A6A723 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF848DC26388D5200A6A723 /* AppDelegate.swift */; };
 		BCF848DF26388D5200A6A723 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF848DE26388D5200A6A723 /* SceneDelegate.swift */; };
 		BCF848E126388D5200A6A723 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF848E026388D5200A6A723 /* ViewController.swift */; };
@@ -25,6 +26,7 @@
 		BC7F2814263A207D0098CAAA /* URLConst.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLConst.swift; sourceTree = "<group>"; };
 		BC7F2816263A20BF0098CAAA /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		BC7F2818263A231F0098CAAA /* USPSAddressModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USPSAddressModel.swift; sourceTree = "<group>"; };
+		BCC1A9B1263C872500BBB5DB /* MapQuestModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapQuestModel.swift; sourceTree = "<group>"; };
 		BCF848D926388D5200A6A723 /* MapApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCF848DC26388D5200A6A723 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BCF848DE26388D5200A6A723 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -47,6 +49,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BCC1A9AF263C86D000BBB5DB /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				BC7F2818263A231F0098CAAA /* USPSAddressModel.swift */,
+				BC7F2812263A1FC10098CAAA /* RealtyMoleModel.swift */,
+				BCC1A9B1263C872500BBB5DB /* MapQuestModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		BCC1A9B0263C86E500BBB5DB /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				BC7F2816263A20BF0098CAAA /* DataManager.swift */,
+				BCF848F02638A46900A6A723 /* LocationManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
 		BCF848D026388D5200A6A723 = {
 			isa = PBXGroup;
 			children = (
@@ -68,13 +89,11 @@
 			children = (
 				BCF848DC26388D5200A6A723 /* AppDelegate.swift */,
 				BCF848DE26388D5200A6A723 /* SceneDelegate.swift */,
-				BC7F2814263A207D0098CAAA /* URLConst.swift */,
-				BC7F2818263A231F0098CAAA /* USPSAddressModel.swift */,
-				BC7F2812263A1FC10098CAAA /* RealtyMoleModel.swift */,
-				BC7F2816263A20BF0098CAAA /* DataManager.swift */,
-				BCF848F02638A46900A6A723 /* LocationManager.swift */,
-				BCF848E026388D5200A6A723 /* ViewController.swift */,
 				BCF848E226388D5200A6A723 /* Main.storyboard */,
+				BC7F2814263A207D0098CAAA /* URLConst.swift */,
+				BCF848E026388D5200A6A723 /* ViewController.swift */,
+				BCC1A9B0263C86E500BBB5DB /* Managers */,
+				BCC1A9AF263C86D000BBB5DB /* Model */,
 				BCF848E526388D5300A6A723 /* Assets.xcassets */,
 				BCF848E726388D5300A6A723 /* LaunchScreen.storyboard */,
 				BCF848EA26388D5300A6A723 /* Info.plist */,
@@ -155,6 +174,7 @@
 				BCF848F12638A46900A6A723 /* LocationManager.swift in Sources */,
 				BC7F2813263A1FC10098CAAA /* RealtyMoleModel.swift in Sources */,
 				BCF848E126388D5200A6A723 /* ViewController.swift in Sources */,
+				BCC1A9B2263C872500BBB5DB /* MapQuestModel.swift in Sources */,
 				BC7F2817263A20BF0098CAAA /* DataManager.swift in Sources */,
 				BCF848DD26388D5200A6A723 /* AppDelegate.swift in Sources */,
 				BC7F2819263A231F0098CAAA /* USPSAddressModel.swift in Sources */,

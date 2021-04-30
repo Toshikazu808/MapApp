@@ -104,23 +104,27 @@ struct DataManager {
       var tempString:String = addressString
       var count = 0
       for char in addressString {
-         if char == "," {
+         switch char {
+         case ",":
             let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
             tempString.remove(at: strIndex)
             tempString.insert(contentsOf: "%2C", at: strIndex)
             count += 2
-         }
-         if char == " " {
+            break
+         case " ":
             let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
             tempString.remove(at: strIndex)
             tempString.insert(contentsOf: "%20", at: strIndex)
             count += 2
-         }
-         if char == "#" {
+            break
+         case "#":
             let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
             tempString.remove(at: strIndex)
             tempString.insert(contentsOf: "%23", at: strIndex)
             count += 2
+            break
+         default:
+            break
          }
          count += 1
       }
@@ -143,6 +147,37 @@ struct DataManager {
       return tempString
    } //: scanStreetForUSPS()
    
+   private func scanToMQ(addressString: String) -> String {
+      print("\n\(#function)")
+      var tempString:String = addressString
+      var count = 0
+      for char in addressString {
+         switch char {
+         case ",":
+            let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
+            tempString.remove(at: strIndex)
+            tempString.insert(contentsOf: "%2C", at: strIndex)
+            count += 2
+            break
+         case " ":
+            let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
+            tempString.remove(at: strIndex)
+            tempString.insert(contentsOf: "+", at: strIndex)
+            break
+         case "#":
+            let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
+            tempString.remove(at: strIndex)
+            tempString.insert(contentsOf: "%23", at: strIndex)
+            count += 2
+            break
+         default:
+            break
+         }
+         count += 1
+      }
+      return tempString
+   } //: scanToMQ()
+   
    func attemptCleanSearch(street: String, city: String, state: String, zipcode: String) {
       print("\n\(#function)")
 //      let scannedStreet = scanStreetForUSPS(street: street)
@@ -150,10 +185,28 @@ struct DataManager {
 //      uspsValidateAddress(url: uspsURL/*, street: street, city: city, state: state, zipcode: zipcode*/)
       // variable:
       
-      let rmAddress = scanToURL(addressString: "\(street) \(city) \(state) \(zipcode)")
-      getRealtyMoleCoordinates(address: rmAddress)
+//      let rmAddress = scanToURL(addressString: "\(street) \(city) \(state) \(zipcode)")
+//      getRealtyMoleCoordinates(address: rmAddress)
+      
+      let mqaddress = scanToMQ(addressString: "\(street) \(city) \(state) \(zipcode)")
+      let mqURL = "\(URLConst.mapQuestURLFirstHalf)\(URLConst.mapQuestKey)\(URLConst.mapQuestURLAfterKey)\(mqaddress)\(URLConst.mapQuestURLAfterLocation)"
+      getMQCoordinates(url: mqURL)
       
    } //: attemptSearch
+   
+   private func getMQCoordinates(url: String) -> Void {
+      print("\n\(#function)")
+      performRequest(urlString: url, returnType: MapQuestModel.self) { result in
+         switch result {
+         case .failure(let error):
+            print(error)
+         case .success(let success):            
+            DataManager.lat = success.results[0].locations[0].displayLatLng.lat
+            DataManager.long = success.results[0].locations[0].displayLatLng.lng
+            delegate?.pinSearchOnMap()
+         }
+      }
+   } //: getMQCoordinates
    
    private func uspsValidateAddress(url: String/*, street: String, city: String, state: String, zipcode: String*/) -> Void {
       print("\n\(#function)")
