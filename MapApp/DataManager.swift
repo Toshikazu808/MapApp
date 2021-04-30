@@ -7,7 +7,12 @@
 
 import Foundation
 
+protocol DataManagerDelegate {
+   func pinSearchOnMap()
+}
+
 struct DataManager {
+   var delegate: DataManagerDelegate?
    static var lat: Double = 0
    static var long: Double = 0
    
@@ -31,6 +36,7 @@ struct DataManager {
    } //: checkForZip()
    
    func splitAddressForUSPS(address: String) -> (street: String, city: String, state: String, zip: String) {
+      print("\n\(#function)")
       let reversedAddress = address.reversed()
       var reversedZip:String = ""
       var reversedState:String = ""
@@ -61,33 +67,113 @@ struct DataManager {
       return (street, city, state, zip)
    } //: splitAddressForUSPS
    
+   func removeComma(addressElement: String) -> String {
+      print("\n\(#function)")
+      var element:String = addressElement
+      print(element)
+      var count = 0
+      for char in element {
+         if char == "," {
+            let strIndex = element.index(element.startIndex, offsetBy: count)
+            element.remove(at: strIndex)
+         }
+         count += 1
+      }
+      print(element)
+      return element
+   } //: removeComma()
+   
+   func removeSpaces(addressElement: String) -> String {
+      print("\n\(#function)")
+      var element:String = addressElement
+      print(element)
+      var count = 0
+      for char in element {
+         if char == " " {
+            let strIndex = element.index(element.startIndex, offsetBy: count)
+            element.remove(at: strIndex)
+         }
+         count += 1
+      }
+      print(element)
+      return element
+   } //: removeSpaces()
+   
+   private func scanToURL(addressString: String) -> String {
+      print("\n\(#function)")
+      var tempString:String = addressString
+      var count = 0
+      for char in addressString {
+         if char == "," {
+            let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
+            tempString.remove(at: strIndex)
+            tempString.insert(contentsOf: "%2C", at: strIndex)
+            count += 2
+         }
+         if char == " " {
+            let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
+            tempString.remove(at: strIndex)
+            tempString.insert(contentsOf: "%20", at: strIndex)
+            count += 2
+         }
+         if char == "#" {
+            let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
+            tempString.remove(at: strIndex)
+            tempString.insert(contentsOf: "%23", at: strIndex)
+            count += 2
+         }
+         count += 1
+      }
+      return tempString
+   } //: scanString()
+   
+   private func scanStreetForUSPS(street: String) -> String {
+      print("\n\(#function)")
+      var tempString:String = street
+      var count = 0
+      for char in street {
+         if char == " " {
+            let strIndex = tempString.index(tempString.startIndex, offsetBy: count)
+            tempString.remove(at: strIndex)
+            tempString.insert(contentsOf: "%20", at: strIndex)
+            count += 2
+         }
+         count += 1
+      }
+      return tempString
+   } //: scanStreetForUSPS()
+   
    func attemptCleanSearch(street: String, city: String, state: String, zipcode: String) {
-      uspsValidateAddress(url: URLConst.uspsURL, street: street, city: city, state: state, zipcode: zipcode)
+      print("\n\(#function)")
+//      let scannedStreet = scanStreetForUSPS(street: street)
+//      let uspsURL = "\(URLConst.uspsURL)&street=\(scannedStreet)&city=\(city)&state=\(state)&zipcode=\(zipcode)&method=get"
+//      uspsValidateAddress(url: uspsURL/*, street: street, city: city, state: state, zipcode: zipcode*/)
+      // variable:
+      
+      let rmAddress = scanToURL(addressString: "\(street) \(city) \(state) \(zipcode)")
+      getRealtyMoleCoordinates(address: rmAddress)
+      
    } //: attemptSearch
    
-   private func uspsValidateAddress(url: String, street: String, city: String, state: String, zipcode: String) -> Void {
-      performCallNoHeader(
-         url: url,
-         returnType: USPSAddressModel.self) { (result) in
+   private func uspsValidateAddress(url: String/*, street: String, city: String, state: String, zipcode: String*/) -> Void {
+      print("\n\(#function)")
+      performRequest(urlString: url, returnType: [USPSAddressModel].self) { result in
          switch result {
          case .failure(let error):
             print(error)
          case .success(let success):
             print("\nUSPS API call was successful: \(success)")
-            getRealtyMoleCoordinates(
-               address: success.delivery_line_1,
-               city: success.components.city_name,
-               state: success.components.state_abbreviation,
-               zipcode: success.components.zipcode)
-            // PIN LOCATION
-            
+            let parsedAddress = "\(success[0].delivery_line_1) \(success[0].last_line)"
+            let rmAddress = scanToURL(addressString: parsedAddress)
+            getRealtyMoleCoordinates(address: rmAddress)
          }
       }
    } //: uspsValidateAddress()
    
-   private func getRealtyMoleCoordinates(address: String, city: String, state: String, zipcode: String) {
+   private func getRealtyMoleCoordinates(address: String) {
+      print("\n\(#function)")
       performCallWithHeaders(
-         url: URLConst.realtyMoleURL,
+         url: "\(URLConst.realtyMoleURL)\(address)",
          headers: URLConst.realtyMoleHeaders,
          expectingReturnType: RealtyMole.self) { (result) in
          switch result {
@@ -96,47 +182,17 @@ struct DataManager {
          case .success(let success):
             DataManager.lat = success.latitude
             DataManager.long = success.longitude
+            delegate?.pinSearchOnMap()
          }
       }
    } //: getRealtyMoleRentEstimate()
-   
-   private func performCallNoHeader<T: Codable>(
-      url: String,
-      returnType: T.Type,
-      completion: @escaping (Result<T, Error>) -> Void ) {
-      let request = NSMutableURLRequest(
-         url: NSURL(string: url)! as URL,
-         cachePolicy: .useProtocolCachePolicy,
-         timeoutInterval: 10.0)
-      let task = URLSession.shared.dataTask(
-         with: request as URLRequest) { (data, response, error) in
-         if let error = error {
-            completion(.failure(error))
-            return
-         } else {
-            let httpResponse = response as? HTTPURLResponse
-            print(httpResponse as Any)
-         }
-         guard let data = data else { return }
-         do {
-            let json = try JSONSerialization.jsonObject(
-               with: data, options: .mutableContainers)
-            print(json)
-            let decodedData = try JSONDecoder().decode(T.self, from: data)
-            completion(.success(decodedData))
-         } catch let decodingErr {
-            completion(.failure(decodingErr))
-         }
-      }
-      task.resume()
-   } //: performCallNoHeader
    
    private func performCallWithHeaders<T: Codable>(
       url: String,
       headers: [String:String],
       expectingReturnType: T.Type,
       completion: @escaping (Result<T, Error>) -> Void ) {
-      
+      print("\n\(#function)")
       let request = NSMutableURLRequest(
          url: NSURL(string: url)! as URL,
          cachePolicy: .useProtocolCachePolicy,
@@ -167,5 +223,68 @@ struct DataManager {
       task.resume()
    } //: performAPICall()
    
+   private func performCallNoHeader<T: Codable>(
+      url: String,
+      returnType: T.Type,
+      completion: @escaping (Result<T, Error>) -> Void ) {
+      print("\n\(#function)")
+      let request = NSMutableURLRequest(
+         url: NSURL(string: url)! as URL,
+         cachePolicy: .useProtocolCachePolicy,
+         timeoutInterval: 10.0)
+      let task = URLSession.shared.dataTask(
+         with: request as URLRequest) { (data, response, error) in
+         if let error = error {
+            completion(.failure(error))
+            return
+         } else {
+            let httpResponse = response as? HTTPURLResponse
+            print(httpResponse as Any)
+         }
+         guard let data = data else { return }
+         do {
+            let json = try JSONSerialization.jsonObject(
+               with: data, options: .mutableContainers) // .allowFragments
+            print(json)
+            
+            let decodedData = try JSONDecoder().decode(T.self, from: data)
+            completion(.success(decodedData))
+         } catch let decodingErr {
+            completion(.failure(decodingErr))
+         }
+      }
+      task.resume()
+   } //: performCallNoHeader
+   
+   private func performRequest<T: Codable>(urlString: String, returnType: T.Type, completion: @escaping (Result<T, Error>) -> Void ) {
+      print("\n\(#function)")
+      if let url = URL(string: urlString) {
+         let session = URLSession(configuration: .default)
+         let task = session.dataTask(with: url) { (data, response, error) in
+            let httpResponse = response as? HTTPURLResponse
+            print(httpResponse as Any)
+            if let error = error {
+               completion(.failure(error))
+               return
+            } else {
+               let httpResponse = response as? HTTPURLResponse
+               print(httpResponse as Any)
+            }
+            guard let data = data else { return }
+            let decoder = JSONDecoder()
+            do {
+               let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers)
+               print(json)
+               let decodedData = try decoder.decode(T.self, from: data)
+               completion(.success(decodedData))
+            } catch let decodingErr {
+               completion(.failure(decodingErr))
+            }
+         }
+         task.resume()
+      } else {
+         print("something went wrong with the url")
+      }
+   } //: performRequest()
    
 } //: DataManager

@@ -16,6 +16,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
    static let regionInMeters: Double = 10000
    
    public func getUserLocation(completion: @escaping ((CLLocation) -> Void)) {
+      print("\n\(#function)")
       self.completion = completion
       manager.requestWhenInUseAuthorization()
       manager.delegate = self
@@ -23,6 +24,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
    } //: getUserLocation()
    
    public func resolveLocationName(with location: CLLocation, completion: @escaping ((String?) -> Void)) {
+      print("\n\(#function)")
       let geocoder = CLGeocoder()
       geocoder.reverseGeocodeLocation(location, preferredLocale: .current) { placemarks, error in
          guard let place = placemarks?.first, error == nil else {
@@ -42,12 +44,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
    } //: resolveLocationName()
    
    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+      print("\n\(#function)")
       guard let location = locations.first else { return }
       completion?(location)
       manager.stopUpdatingLocation()
    } //: locationManager()
    
    func centerViewOnUserLocation(mapView: MKMapView) {
+      print("\n\(#function)")
       if let location = manager.location?.coordinate {
          let region = MKCoordinateRegion.init(
             center: location,
@@ -58,6 +62,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
    } //: centerViewOnUserLocation()
    
    public func addMapPin(with location: CLLocation, mapView: MKMapView) -> CLLocation {
+      print("\n\(#function)")
       let pin = MKPointAnnotation()
       pin.coordinate = location.coordinate
       mapView.setRegion(
