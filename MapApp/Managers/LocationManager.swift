@@ -43,14 +43,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
       }
    } //: resolveLocationName()
    
-   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+   public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
       print("\n\(#function)")
       guard let location = locations.first else { return }
       completion?(location)
       manager.stopUpdatingLocation()
    } //: locationManager()
    
-   func centerViewOnUserLocation(mapView: MKMapView) {
+   public func centerViewOnUserLocation(mapView: MKMapView) {
       print("\n\(#function)")
       if let location = manager.location?.coordinate {
          let region = MKCoordinateRegion.init(
